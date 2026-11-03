@@ -23,6 +23,10 @@ permissions:
   id-token: write
   contents: write
 
+# TEST ONLY: publish to TestPyPI
+env:
+  TWINE_REPOSITORY_URL: https://test.pypi.org/legacy/
+
 jobs:
   publish_sdist:
     name: publish sdist
@@ -64,52 +68,25 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # emulated wheels on linux take too much time, split wheels into multiple runs
+        # TEST ONLY: reduced matrix; two windows-11-arm jobs to test
+        # collecting artifacts from more than one job
         python:
-          - "cp311-* cp312-*"
-          - "cp313-* cp314-*"
-          - "cp315-*"
-          - "cp314t-* cp315t-*"
+          - "cp313-*"
+          - "cp314-*"
         wheel_mode:
           - compiled
         os:
-          - "windows-2022"
           - "windows-11-arm"
           - "macos-15"
           - "ubuntu-22.04"
-          - "ubuntu-22.04-arm"
         linux_archs:
-          # this is only meaningful on linux. windows and macos ignore exclude all but one arch
-          - "aarch64"
           - "x86_64"
-          - "riscv64"
 
         include:
           # create pure python build
           - os: ubuntu-22.04
             wheel_mode: pure-python
             python: "cp-314*"
-
-        exclude:
-          - os: "windows-2022"
-            linux_archs: "aarch64"
-          # ignored on windows, just avoid to run it multiple times
-          - os: "windows-11-arm"
-            linux_archs: "aarch64"
-          - os: "macos-15"
-            linux_archs: "x86_64"
-          - os: "ubuntu-22.04"
-            linux_archs: "aarch64"
-          - os: "ubuntu-22.04-arm"
-            linux_archs: "x86_64"
-          - os: "windows-2022"
-            linux_archs: "riscv64"
-          - os: "windows-11-arm"
-            linux_archs: "riscv64"
-          - os: "macos-15"
-            linux_archs: "riscv64"
-          - os: "ubuntu-22.04-arm"
-            linux_archs: "riscv64"
 
       fail-fast: false
 
